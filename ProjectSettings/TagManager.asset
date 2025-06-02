@@ -14,6 +14,10 @@ TagManager:
   - Cleric Interactible
   - Peasant Interactible
   - Knight Interactible
+  - Hospitaller Interactible
+  - Templar Interactible
+  - Teutonic Interactible
+  - CanBeToggled
   layers:
   - Default
   - TransparentFX

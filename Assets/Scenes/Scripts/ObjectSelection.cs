@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -22,10 +23,11 @@ public class ObjectSelection : MonoBehaviour
                 audioSource = FindObjectOfType<AudioSources>();
                 audioSource.interactionAudioSource.Play();
 
+
+                //-- Three orders room: Click Object to play sound effects --
+
                 if (playerInteraction.coll.tag == "Cleric Interactible")
                 {
-                    //Debug.Log("soundIntroAudioSource is null? " + (audioSource.soundIntroAudioSource == null));
-                    //Debug.Log("clericSounds is null? " + (audioClip.clericSounds == null));
                     audioSource.soundIntroAudioSource.clip = audioClip.clericSounds;
                     audioSource.soundIntroAudioSource.Play();
                 }
@@ -41,6 +43,49 @@ public class ObjectSelection : MonoBehaviour
                     audioSource.soundIntroAudioSource.clip = audioClip.peasantSounds;
                     audioSource.soundIntroAudioSource.Play();
                 }
+
+
+                //-- Crusades room: Click Object to display text and lights on map --
+
+                if (playerInteraction.coll.tag == "Hospitaller Interactible")
+                {
+                    TextMeshPro linkedText = playerInteraction.coll.GetComponentInChildren<TextMeshPro>(includeInactive: true);
+                    if (linkedText != null)
+                    {
+                        linkedText.gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("No TextMeshPro found!");
+                    }
+                }
+
+                if (playerInteraction.coll.tag == "Templar Interactible")
+                {
+                    TextMeshPro linkedText = playerInteraction.coll.GetComponentInChildren<TextMeshPro>(includeInactive: true);
+                    if (linkedText != null)
+                    {
+                        linkedText.gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("No TextMeshPro found!");
+                    }
+                }
+
+                if (playerInteraction.coll.tag == "Teutonic Interactible")
+                {
+                    TextMeshPro linkedText = playerInteraction.coll.GetComponentInChildren<TextMeshPro>(includeInactive: true);
+                    if (linkedText != null)
+                    {
+                        linkedText.gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("No TextMeshPro found!");
+                    }
+                }
+
             }
         }
     }

@@ -10,6 +10,13 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField] internal Collider savedCollider;
     internal Collider coll;
     private Color col = Color.blue;
+
+    void Start()
+    {
+        //Hides the cursor
+        Cursor.visible = false;
+    }
+    
     void Update()
     {
         EnlightObject();
