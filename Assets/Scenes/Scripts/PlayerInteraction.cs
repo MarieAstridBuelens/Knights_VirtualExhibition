@@ -33,7 +33,7 @@ public class PlayerInteraction : MonoBehaviour
             coll = hit.collider;
 
             //if (coll.TryGetComponent(out Renderer renderer) && coll.CompareTag("Interactible"))
-            if (coll.TryGetComponent(out Renderer renderer) && Regex.IsMatch(coll.tag, @"\bInteractible\b"))
+            if (coll.TryGetComponent(out Renderer renderer) && (Regex.IsMatch(coll.tag, @"\bInteractible\b")|| Regex.IsMatch(coll.tag, @"\bGrabbable\b")))
             {
                 renderer.material.SetFloat("_Glow", 5f);
                 canClick = true;

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using System.Text.RegularExpressions;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 public class ObjectSelection : MonoBehaviour
 {
@@ -10,83 +12,177 @@ public class ObjectSelection : MonoBehaviour
     [SerializeField] internal PlayerInteraction playerInteraction;
     internal AudioSources audioSource;
     [SerializeField] internal AudioClips audioClip;
+    private bool dragging = false;
+    private Transform draggedObject = null;
+    private float dragDistance;
+    private float fixedZValue;
 
+    void Start()
+    {
+        //Keep the mouse on the center of the screen
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
 
     void Update()
     {
-        if (playerInteraction.canClick == true)
+        // Drag stop
+        if (Input.GetMouseButtonUp(0) && dragging)
         {
-            Debug.Log("CanClick is true");
+            Debug.Log("Stopping to drag: " + draggedObject.name);
+            dragging = false;
+            ResetSlots(draggedObject);
+            draggedObject = null;
+        }
 
-            if (Input.GetMouseButtonUp(0))
+        if (!playerInteraction.canClick) return;
+
+        //Simple button interactions
+        if (Input.GetMouseButtonUp(0) && !Regex.IsMatch(playerInteraction.coll.tag, @"\bGrabbable\b"))
+        {
+            audioSource = FindObjectOfType<AudioSources>();
+            audioSource.interactionAudioSource.Play();
+
+
+            //-- Three orders room: Click Object to play sound effects --
+
+            if (playerInteraction.coll.tag == "Cleric Interactible")
             {
-                audioSource = FindObjectOfType<AudioSources>();
-                audioSource.interactionAudioSource.Play();
+                audioSource.soundIntroAudioSource.clip = audioClip.clericSounds;
+                audioSource.soundIntroAudioSource.Play();
+            }
+
+            if (playerInteraction.coll.tag == "Knight Interactible")
+            {
+                audioSource.soundIntroAudioSource.clip = audioClip.knightSounds;
+                audioSource.soundIntroAudioSource.Play();
+            }
+
+            if (playerInteraction.coll.tag == "Peasant Interactible")
+            {
+                audioSource.soundIntroAudioSource.clip = audioClip.peasantSounds;
+                audioSource.soundIntroAudioSource.Play();
+            }
 
 
-                //-- Three orders room: Click Object to play sound effects --
+            //-- Crusades room: Click Object to display text and lights on map --
 
-                if (playerInteraction.coll.tag == "Cleric Interactible")
+            if (playerInteraction.coll.tag == "Hospitaller Interactible")
+            {
+                TextMeshPro linkedText = playerInteraction.coll.GetComponentInChildren<TextMeshPro>(includeInactive: true);
+                if (linkedText != null)
                 {
-                    audioSource.soundIntroAudioSource.clip = audioClip.clericSounds;
-                    audioSource.soundIntroAudioSource.Play();
+                    linkedText.gameObject.SetActive(true);
                 }
-
-                if (playerInteraction.coll.tag == "Knight Interactible")
+                else
                 {
-                    audioSource.soundIntroAudioSource.clip = audioClip.knightSounds;
-                    audioSource.soundIntroAudioSource.Play();
+                    Debug.LogWarning("No TextMeshPro found!");
                 }
+            }
 
-                if (playerInteraction.coll.tag == "Peasant Interactible")
+            if (playerInteraction.coll.tag == "Templar Interactible")
+            {
+                TextMeshPro linkedText = playerInteraction.coll.GetComponentInChildren<TextMeshPro>(includeInactive: true);
+                if (linkedText != null)
                 {
-                    audioSource.soundIntroAudioSource.clip = audioClip.peasantSounds;
-                    audioSource.soundIntroAudioSource.Play();
+                    linkedText.gameObject.SetActive(true);
                 }
-
-
-                //-- Crusades room: Click Object to display text and lights on map --
-
-                if (playerInteraction.coll.tag == "Hospitaller Interactible")
+                else
                 {
-                    TextMeshPro linkedText = playerInteraction.coll.GetComponentInChildren<TextMeshPro>(includeInactive: true);
-                    if (linkedText != null)
-                    {
-                        linkedText.gameObject.SetActive(true);
-                    }
-                    else
-                    {
-                        Debug.LogWarning("No TextMeshPro found!");
-                    }
+                    Debug.LogWarning("No TextMeshPro found!");
                 }
+            }
 
-                if (playerInteraction.coll.tag == "Templar Interactible")
+            if (playerInteraction.coll.tag == "Teutonic Interactible")
+            {
+                TextMeshPro linkedText = playerInteraction.coll.GetComponentInChildren<TextMeshPro>(includeInactive: true);
+                if (linkedText != null)
                 {
-                    TextMeshPro linkedText = playerInteraction.coll.GetComponentInChildren<TextMeshPro>(includeInactive: true);
-                    if (linkedText != null)
-                    {
-                        linkedText.gameObject.SetActive(true);
-                    }
-                    else
-                    {
-                        Debug.LogWarning("No TextMeshPro found!");
-                    }
+                    linkedText.gameObject.SetActive(true);
                 }
-
-                if (playerInteraction.coll.tag == "Teutonic Interactible")
+                else
                 {
-                    TextMeshPro linkedText = playerInteraction.coll.GetComponentInChildren<TextMeshPro>(includeInactive: true);
-                    if (linkedText != null)
-                    {
-                        linkedText.gameObject.SetActive(true);
-                    }
-                    else
-                    {
-                        Debug.LogWarning("No TextMeshPro found!");
-                    }
+                    Debug.LogWarning("No TextMeshPro found!");
                 }
+            }
 
+
+        }
+
+
+        //Drag and Drop game
+
+        // Drag start
+        if (Input.GetMouseButtonDown(0) && IsGrabbable(playerInteraction.coll))
+        {
+            draggedObject = playerInteraction.coll.transform;
+            dragDistance = Vector3.Distance(Camera.main.transform.position, draggedObject.position);
+            fixedZValue = draggedObject.position.z;
+            dragging = true;
+            Debug.Log("Starting to drag: " + draggedObject.name);
+        }
+
+        // Drag movement
+        if (dragging && draggedObject != null)
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Vector3 targetPos = ray.GetPoint(dragDistance);
+
+            EnlightSlots(draggedObject);
+
+            //Lock Z pos
+            targetPos.z = fixedZValue;
+
+            //Use Rigidbody to avoid enter into walls
+            Rigidbody rb = draggedObject.GetComponent<Rigidbody>();
+            if (rb != null && rb.isKinematic)
+            {
+                rb.MovePosition(targetPos);
+            }
+
+            else
+            {
+                draggedObject.position = targetPos; //(won't avoid to get through walls but avoid crashes)
+            }
+        } 
+
+
+    }
+
+    internal void EnlightSlots(Transform movingObject)
+    {
+        Transform parent = movingObject.parent;
+        if (parent == null) return;
+
+        foreach (Transform child in parent)
+        {
+            if (child == null) return;
+
+            if (child.TryGetComponent(out Renderer renderer) && child.CompareTag("Slot"))
+            {
+                renderer.material.SetFloat("_Glow", 5f);
             }
         }
+    }
+
+    internal void ResetSlots(Transform movingObject)
+    {
+        Transform parent = movingObject.parent;
+        if (parent == null) return;
+
+        foreach (Transform child in parent)
+        {
+            if (child == null) return;
+
+            if (child.TryGetComponent(out Renderer renderer) && child.CompareTag("Slot"))
+            {
+                renderer.material.SetFloat("_Glow", 0f);
+            }
+        }
+    }
+
+    private bool IsGrabbable(Collider col)
+    {
+        return col != null && Regex.IsMatch(col.tag, @"\bGrabbable\b");
     }
 }
