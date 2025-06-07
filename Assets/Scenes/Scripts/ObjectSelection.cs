@@ -10,18 +10,19 @@ public class ObjectSelection : MonoBehaviour
 {
 
     [SerializeField] internal PlayerInteraction playerInteraction;
-    internal AudioSources audioSource;
+    [SerializeField] internal AudioSources audioSource;
     [SerializeField] internal AudioClips audioClip;
     private bool dragging = false;
     private Transform draggedObject = null;
     private float dragDistance;
     private float fixedZValue;
+    [SerializeField] private float collideDistance = 0.3f;
 
     void Start()
     {
-        //Keep the mouse on the center of the screen
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        
+
+
     }
 
     void Update()
@@ -30,6 +31,38 @@ public class ObjectSelection : MonoBehaviour
         if (Input.GetMouseButtonUp(0) && dragging)
         {
             Debug.Log("Stopping to drag: " + draggedObject.name);
+
+            audioSource = FindObjectOfType<AudioSources>();
+
+            float distanceToSlot = Vector3.Distance(draggedObject.position, draggedObject.GetComponent<SlotPairing>().correctSlot.position);
+            if (distanceToSlot < collideDistance)
+            {
+
+                audioSource.successOrFailureAudioSource.clip = audioClip.victorySound;
+                audioSource.successOrFailureAudioSource.Play();
+                draggedObject.position = draggedObject.GetComponent<SlotPairing>().correctSlot.position;
+                draggedObject.GetComponent<SlotPairing>().correctSlot.gameObject.SetActive(false);
+                draggedObject.GetComponent<SlotPairing>().infoText.gameObject.SetActive(true);
+                draggedObject.tag = "Untagged";
+
+                //End of minigame: main image display
+                if (draggedObject.GetComponent<SlotsDone>().data1.tag == "Untagged" && draggedObject.GetComponent<SlotsDone>().data2.tag == "Untagged" && draggedObject.GetComponent<SlotsDone>().data3.tag == "Untagged")
+                {
+                    draggedObject.GetComponent<SlotsDone>().mainImage.SetActive(true);
+                    draggedObject.GetComponent<SlotsDone>().title.SetActive(true);
+                    draggedObject.GetComponent<SlotsDone>().centuries.SetActive(true);
+                    audioSource.successOrFailureAudioSource.clip = audioClip.victory2Sound;
+                    audioSource.successOrFailureAudioSource.Play();
+
+                }
+
+            }
+            else
+            {
+                audioSource.successOrFailureAudioSource.clip = audioClip.failureSound;
+                audioSource.successOrFailureAudioSource.Play();
+            }
+
             dragging = false;
             ResetSlots(draggedObject);
             draggedObject = null;

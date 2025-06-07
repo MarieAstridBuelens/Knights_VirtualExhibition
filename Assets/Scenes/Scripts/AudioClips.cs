@@ -8,4 +8,8 @@ public class AudioClips : MonoBehaviour
     public AudioClip clericSounds;
     public AudioClip peasantSounds;
 
+    public AudioClip victorySound;
+    public AudioClip victory2Sound;
+    public AudioClip failureSound;
+
 }

@@ -15,6 +15,10 @@ public class PlayerInteraction : MonoBehaviour
     {
         //Hides the cursor
         Cursor.visible = false;
+        
+        //Keep the mouse on the center of the screen
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
     
     void Update()

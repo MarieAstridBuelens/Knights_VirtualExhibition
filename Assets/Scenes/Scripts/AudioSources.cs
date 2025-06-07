@@ -10,4 +10,5 @@ public class AudioSources : MonoBehaviour
 
     public AudioSource interactionAudioSource;
     public AudioSource soundIntroAudioSource;
+    public AudioSource successOrFailureAudioSource;
 }
