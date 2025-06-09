@@ -21,7 +21,7 @@ public class PlayerMove : MonoBehaviour
 
     private Rigidbody agent_rigidbody;
     [SerializeField] private Transform cameraPivot;
-    private float xRotation = -10f;
+    private float xRotation = -2.5f;
 
     private void OnEnable()
     {
