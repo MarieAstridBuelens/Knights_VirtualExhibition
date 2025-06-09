@@ -18,12 +18,6 @@ public class ObjectSelection : MonoBehaviour
     private float fixedZValue;
     [SerializeField] private float collideDistance = 0.3f;
 
-    void Start()
-    {
-        
-
-
-    }
 
     void Update()
     {
@@ -45,17 +39,26 @@ public class ObjectSelection : MonoBehaviour
                 draggedObject.GetComponent<SlotPairing>().infoText.gameObject.SetActive(true);
                 draggedObject.tag = "Untagged";
 
-                //End of minigame: main image display
-                if (draggedObject.GetComponent<SlotsDone>().data1.tag == "Untagged" && draggedObject.GetComponent<SlotsDone>().data2.tag == "Untagged" && draggedObject.GetComponent<SlotsDone>().data3.tag == "Untagged")
+                //End of Timeline minigame: main image display
+                if (draggedObject.TryGetComponent<SlotsDone>(out SlotsDone _))
                 {
-                    draggedObject.GetComponent<SlotsDone>().mainImage.SetActive(true);
-                    draggedObject.GetComponent<SlotsDone>().title.SetActive(true);
-                    draggedObject.GetComponent<SlotsDone>().centuries.SetActive(true);
-                    audioSource.successOrFailureAudioSource.clip = audioClip.victory2Sound;
-                    audioSource.successOrFailureAudioSource.Play();
 
+                    if (draggedObject.GetComponent<SlotsDone>().data1.tag == "Untagged" && draggedObject.GetComponent<SlotsDone>().data2.tag == "Untagged" && draggedObject.GetComponent<SlotsDone>().data3.tag == "Untagged")
+                    {
+                        draggedObject.GetComponent<SlotsDone>().mainImage.SetActive(true);
+                        draggedObject.GetComponent<SlotsDone>().title.SetActive(true);
+                        draggedObject.GetComponent<SlotsDone>().centuries.SetActive(true);
+                        audioSource.successOrFailureAudioSource.clip = audioClip.victory2Sound;
+                        audioSource.successOrFailureAudioSource.Play();
+
+                    }
                 }
 
+                //CoatOfArms minigame goes to next level
+                if (draggedObject.parent.TryGetComponent<LevelSwitch>(out LevelSwitch levelSwitch))
+                {
+                    StartCoroutine(ChangeLevel(levelSwitch));
+                }
             }
             else
             {
@@ -97,7 +100,7 @@ public class ObjectSelection : MonoBehaviour
                 audioSource.soundIntroAudioSource.Play();
             }
 
-
+            
             //-- Crusades room: Click Object to display text and lights on map --
 
             if (playerInteraction.coll.tag == "Hospitaller Interactible")
@@ -177,7 +180,7 @@ public class ObjectSelection : MonoBehaviour
             {
                 draggedObject.position = targetPos; //(won't avoid to get through walls but avoid crashes)
             }
-        } 
+        }
 
 
     }
@@ -217,5 +220,15 @@ public class ObjectSelection : MonoBehaviour
     private bool IsGrabbable(Collider col)
     {
         return col != null && Regex.IsMatch(col.tag, @"\bGrabbable\b");
+    }
+
+    internal IEnumerator ChangeLevel(LevelSwitch levelSwitchScript)
+    {
+        yield return new WaitForSeconds(1.2f);
+        audioSource.successOrFailureAudioSource.clip = audioClip.victory2Sound;
+        audioSource.successOrFailureAudioSource.Play();
+        levelSwitchScript.levelToSetVisible.SetActive(true);
+        levelSwitchScript.levelToSetInvisible.SetActive(false);
+        Debug.Log("A moment has passed");
     }
 }

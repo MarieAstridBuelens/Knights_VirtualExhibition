@@ -20,6 +20,7 @@ TagManager:
   - CanBeToggled
   - Grabbable
   - Slot
+  - ToLevel1 Interactible
   layers:
   - Default
   - TransparentFX
