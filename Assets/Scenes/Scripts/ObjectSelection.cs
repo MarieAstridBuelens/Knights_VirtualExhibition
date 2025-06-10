@@ -224,7 +224,7 @@ public class ObjectSelection : MonoBehaviour
 
     internal IEnumerator ChangeLevel(LevelSwitch levelSwitchScript)
     {
-        yield return new WaitForSeconds(1.2f);
+        yield return new WaitForSeconds(1f);
         audioSource.successOrFailureAudioSource.clip = audioClip.victory2Sound;
         audioSource.successOrFailureAudioSource.Play();
         levelSwitchScript.levelToSetVisible.SetActive(true);

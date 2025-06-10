@@ -6,12 +6,14 @@ using UnityEngine.InputSystem;
 
 public class PlayerMove : MonoBehaviour
 {
-    
+
     public InputActionAsset InputActions;
 
     private InputAction m_moveAction;
     private InputAction m_lookAction;
     private InputAction m_interactAction;
+    private InputAction m_toggleMenuAction;
+    private InputAction m_quitGameAction;
 
     private Vector2 m_moveAmt;
     private Vector2 m_lookAmt;
@@ -23,14 +25,24 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] private Transform cameraPivot;
     private float xRotation = -2.5f;
 
+    [SerializeField] internal GameObject canvas;
+
+
+
     private void OnEnable()
     {
         InputActions.FindActionMap("Player").Enable();
+
+        m_toggleMenuAction.performed += ToggleMenu;
+        m_quitGameAction.performed += QuitGame;
     }
 
     private void OnDisable()
     {
         InputActions.FindActionMap("Player").Disable();
+
+        m_toggleMenuAction.performed -= ToggleMenu;
+        m_quitGameAction.performed -= QuitGame;
     }
 
     private void Awake()
@@ -38,6 +50,9 @@ public class PlayerMove : MonoBehaviour
         m_moveAction = InputSystem.actions.FindAction("Move");
         m_lookAction = InputSystem.actions.FindAction("Look");
         m_interactAction = InputSystem.actions.FindAction("Interact");
+
+        m_toggleMenuAction = InputSystem.actions.FindAction("ToggleMenu");
+        m_quitGameAction = InputSystem.actions.FindAction("QuitGame");
 
         agent_rigidbody = GetComponent<Rigidbody>();
     }
@@ -72,6 +87,18 @@ public class PlayerMove : MonoBehaviour
         xRotation += rotationAmountY;
         xRotation = Mathf.Clamp(xRotation, -40f, 30f); //for not go up or down to far
         cameraPivot.localRotation = Quaternion.Euler(0f, 0f, xRotation);
+    }
+
+    private void ToggleMenu(InputAction.CallbackContext context)
+    {
+        bool isMenuVisible = canvas.gameObject.activeSelf;
+        isMenuVisible = !isMenuVisible;
+        canvas.gameObject.SetActive(isMenuVisible);
+    }
+
+    private void QuitGame(InputAction.CallbackContext context)
+    {
+        Application.Quit();
     }
 
 
